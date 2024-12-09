@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -16,23 +15,23 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-//go:embed templates/*.html
-var templates embed.FS
+var startPage = template.Must(template.ParseFiles(
+	"cmd/generator/templates/base.html",
+	"cmd/generator/templates/start.html",
+))
+
+var recipePage = template.Must(template.ParseFiles(
+	"cmd/generator/templates/base.html",
+	"cmd/generator/templates/recipe.html",
+))
 
 func main() {
-	templs, err := template.New("").ParseFS(templates, "templates/*.html")
-	if err != nil {
-		panic(err)
-	}
 	markdown := goldmark.New()
 	if err := os.MkdirAll("public", os.ModePerm); err != nil {
 		panic(err)
 	}
-	start, err := os.Create("public/index.html")
-	if err != nil {
-		panic(err)
-	}
-	defer start.Close()
+
+	links := make([]string, 0)
 	if err := filepath.WalkDir("recipes", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
@@ -41,7 +40,7 @@ func main() {
 		if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
 			panic(err)
 		}
-		start.Write([]byte(fmt.Sprintf("<a href=\"%s\">%s</a>", strings.TrimSuffix(d.Name(), ".md"), strings.TrimSuffix(d.Name(), ".md"))))
+		links = append(links, strings.TrimSuffix(d.Name(), ".md"))
 		bs, err := os.ReadFile(path)
 		if err != nil {
 			return err
@@ -56,15 +55,29 @@ func main() {
 		var buf bytes.Buffer
 		context := parser.NewContext()
 		if err := markdown.Convert([]byte(l), &buf, parser.WithContext(context)); err != nil {
-			panic(err)
+			return err
 		}
-		return templs.ExecuteTemplate(f, "base.html", struct {
+		return recipePage.Execute(f, struct {
 			Title   string
 			Content template.HTML
 		}{
 			Title:   m.Title,
 			Content: template.HTML(strings.TrimSpace(buf.String())),
 		})
+	}); err != nil {
+		panic(err)
+	}
+	f, err := os.Create("public/index.html")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	if err := startPage.Execute(f, struct {
+		Title   string
+		Recipes []string
+	}{
+		Title:   "John's Recipes",
+		Recipes: links,
 	}); err != nil {
 		panic(err)
 	}
