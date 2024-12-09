@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -60,9 +61,11 @@ func main() {
 		return recipePage.Execute(f, struct {
 			Title   string
 			Content template.HTML
+			CSSFile string
 		}{
 			Title:   m.Title,
 			Content: template.HTML(strings.TrimSpace(buf.String())),
+			CSSFile: "../output.css",
 		})
 	}); err != nil {
 		panic(err)
@@ -75,10 +78,15 @@ func main() {
 	if err := startPage.Execute(f, struct {
 		Title   string
 		Recipes []string
+		CSSFile string
 	}{
 		Title:   "John's Recipes",
 		Recipes: links,
+		CSSFile: "./output.css",
 	}); err != nil {
+		panic(err)
+	}
+	if err := exec.Command("tailwindcss", "-i", "cmd/generator/input.css", "-o", "public/output.css").Run(); err != nil {
 		panic(err)
 	}
 }
