@@ -86,7 +86,9 @@ func main() {
 	}); err != nil {
 		panic(err)
 	}
-	if err := exec.Command("tailwindcss", "-i", "cmd/generator/input.css", "-o", "public/output.css").Run(); err != nil {
+	cmd := exec.Command("tailwindcss", "-i", "input.css", "-o", "../../public/output.css")
+	cmd.Dir = "cmd/generator"
+	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
 }
