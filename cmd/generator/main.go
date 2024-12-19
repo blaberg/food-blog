@@ -26,13 +26,18 @@ var recipePage = template.Must(template.ParseFiles(
 	"cmd/generator/templates/recipe.html",
 ))
 
+type Link struct {
+	Title string
+	URL   string
+}
+
 func main() {
 	markdown := goldmark.New()
 	if err := os.MkdirAll("public", os.ModePerm); err != nil {
 		panic(err)
 	}
 
-	links := make([]string, 0)
+	links := make([]Link, 0)
 	if err := filepath.WalkDir("recipes", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
@@ -41,12 +46,15 @@ func main() {
 		if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
 			panic(err)
 		}
-		links = append(links, strings.TrimSuffix(d.Name(), ".md"))
 		bs, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
 		m, l := parseFrontMatter(string(bs))
+		links = append(links, Link{
+			Title: m.Title,
+			URL:   strings.TrimSuffix(d.Name(), ".md"),
+		})
 
 		f, err := os.Create(fmt.Sprintf("%s/index.html", dirName))
 		if err != nil {
@@ -77,11 +85,11 @@ func main() {
 	defer f.Close()
 	if err := startPage.Execute(f, struct {
 		Title   string
-		Recipes []string
+		Links   []Link
 		CSSFile string
 	}{
 		Title:   "John's Recipes",
-		Recipes: links,
+		Links:   links,
 		CSSFile: "./output.css",
 	}); err != nil {
 		panic(err)

@@ -1,8 +1,8 @@
 {{define "content" -}}
-<h1 class="font-bold text-lg">John's Recipes</h1>
+<h1 class="font-bold text-lg">John's Rsecipes</h1>
 <div class="flex flex-col mt-2">
-{{range $recipe := .Recipes -}}
-    <a class="text-lg hover:underline" href="{{$recipe}}">{{$recipe}}</a>
+{{range $link := .Links -}}
+    <a class="text-lg hover:underline" href="{{$link.URL}}">{{$link.Title}}</a>
 {{- end}}
 </div>
 {{- end}}
