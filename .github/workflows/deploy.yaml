@@ -10,7 +10,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Upload static files as artifact
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Tailwind CSS CLI
+        run: npm install -g tailwindcss
+      - name: build
+        run: go run cmd/generator/main.go
+      - name: Upload static files as artifacts
         uses: actions/upload-pages-artifact@v3
         id: deployment
         with:
