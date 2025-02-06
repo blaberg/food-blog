@@ -8,7 +8,7 @@ title: Tomatsoppa
 - Två konservburgar med hela tomater
 - 1 gullök
 - 1 rödlök
-- Vitlök
+- Ca 5 vitlöksklyftor
 - Basilika
 - En tärning hönsbuljong
 
