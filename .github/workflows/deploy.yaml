@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: "18"
       - name: Install Tailwind CSS CLI
-        run: npm install -g tailwindcss
+        run: npm i
       - name: build
         run: go run cmd/generator/main.go
       - name: Upload static files as artifacts
