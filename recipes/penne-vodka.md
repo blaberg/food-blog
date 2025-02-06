@@ -30,4 +30,4 @@ title: Penne Vodka
 11. När det är 2 min kvar på innan pastan är klar kan du lägga den till såsen. Häll på pastavatten så att såsen täcker pastan bättre. Lägg i några klickar smör och rör om.
 12. Nu är maten klar! Servera med riven parmesan och finhackad persilja.
 
-Orginalrecept: https://www.notanothercookingshow.tv/post/penne-alla-vodka
+Orginalrecept: [Not another cooking show](https://www.youtube.com/watch?v=VeOAyL4QvnA)
