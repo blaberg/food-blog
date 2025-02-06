@@ -22,4 +22,4 @@ title: Tomatsoppa
 7. Ta ur basilikan som är kvar och börja mixa soppan tills den är helt slät. Det gör inget om basilikan är kvar, men tar man ur den får man en helt slät orange soppa.
 8. När allt är mixas kan du hälla tillbaka soppan i kastrullen (skölj ur den först). Låt den puttra i några minuter till och smaksätt med salt och peppar. Servera med lite bröd (eller en grilled cheese om du vill vara riktigt amerikansk).
 
-Orgninalrecept: [Thomas Straker](https://www.instagram.com/thomas_straker/reel/DCAD5bDOMQB/)
+Orginalrecept: [Thomas Straker](https://www.instagram.com/thomas_straker/reel/DCAD5bDOMQB/)
