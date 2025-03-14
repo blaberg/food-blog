@@ -15,3 +15,5 @@ title: Couscous som inte suger
 2. Skär upp halva gurkan i tärningar och grovhacka russinen. Finhacka ett någorlunda stort knippe av både mynta och koriander, cirka en halv kruka vardera.
 3. När det har gått 10 minuter kan du ta av plasten från couscousen och fluffa upp den.
 4. Tillsätt en juice från en halv citron, gurkan, russinen, örterna och rör om.
+
+Orginalrecept: [Thomas Straker](https://www.youtube.com/shorts/i9iFEA9IqW4)
