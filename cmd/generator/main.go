@@ -88,7 +88,7 @@ func main() {
 		Links   []Link
 		CSSFile string
 	}{
-		Title:   "John's Recipes",
+		Title:   "Johns Recept",
 		Links:   links,
 		CSSFile: "./output.css",
 	}); err != nil {
