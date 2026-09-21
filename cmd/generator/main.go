@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,23 +33,29 @@ type Link struct {
 func main() {
 	markdown := goldmark.New()
 	if err := os.MkdirAll("public", os.ModePerm); err != nil {
-		panic(err)
+		log.Fatalf("Failed to create public directory: %v", err)
 	}
 
 	links := make([]Link, 0)
 	if err := filepath.WalkDir("recipes", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
 			return nil
 		}
 		dirName := fmt.Sprintf("public/%s", strings.TrimSuffix(d.Name(), ".md"))
 		if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
-			panic(err)
+			return err
 		}
 		bs, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		m, l := parseFrontMatter(string(bs))
+		m, l, err := parseFrontMatter(path, string(bs))
+		if err != nil {
+			return err
+		}
 		links = append(links, Link{
 			Title: m.Title,
 			URL:   strings.TrimSuffix(d.Name(), ".md"),
@@ -62,8 +67,7 @@ func main() {
 		}
 		defer f.Close()
 		var buf bytes.Buffer
-		context := parser.NewContext()
-		if err := markdown.Convert([]byte(l), &buf, parser.WithContext(context)); err != nil {
+		if err := markdown.Convert([]byte(l), &buf); err != nil {
 			return err
 		}
 		return recipePage.Execute(f, struct {
@@ -76,11 +80,11 @@ func main() {
 			CSSFile: "../output.css",
 		})
 	}); err != nil {
-		panic(err)
+		log.Fatalf("Failed to build recipe pages: %v", err)
 	}
 	f, err := os.Create("public/index.html")
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to create public/index.html: %v", err)
 	}
 	defer f.Close()
 	if err := startPage.Execute(f, struct {
@@ -92,12 +96,14 @@ func main() {
 		Links:   links,
 		CSSFile: "./output.css",
 	}); err != nil {
-		panic(err)
+		log.Fatalf("Failed to render the start page: %v", err)
 	}
 	cmd := exec.Command("npx", "@tailwindcss/cli", "-i", "input.css", "-o", "../../public/output.css", "-m")
 	cmd.Dir = "cmd/generator"
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("Failed to build the CSS with Tailwind: %v", err)
 	}
 }
 
@@ -105,16 +111,17 @@ type Metadata struct {
 	Title string `yaml:"title"`
 }
 
-func parseFrontMatter(content string) (Metadata, string) {
+// parseFrontMatter splits a recipe into its YAML front matter and the markdown
+// body that follows it. path is only used to name the file in error messages.
+func parseFrontMatter(path, content string) (Metadata, string, error) {
 	parts := strings.SplitN(content, "---", 3)
 	if len(parts) < 3 {
-		log.Fatalf("Invalid front matter format")
+		return Metadata{}, "", fmt.Errorf("%s: invalid front matter format", path)
 	}
 	var meta Metadata
-	err := yaml.Unmarshal([]byte(parts[1]), &meta)
-	if err != nil {
-		log.Fatalf("Failed to parse front matter: %v", err)
+	if err := yaml.Unmarshal([]byte(parts[1]), &meta); err != nil {
+		return Metadata{}, "", fmt.Errorf("%s: failed to parse front matter: %w", path, err)
 	}
 
-	return meta, parts[2] // Metadata and the remaining content
+	return meta, parts[2], nil // Metadata and the remaining content
 }
