@@ -11,11 +11,14 @@ on:
       - package.json
       - package-lock.json
       - .github/workflows/deploy.yaml
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -44,6 +47,7 @@ jobs:
         with:
           path: public/
   deploy:
+    if: github.event_name != 'pull_request'
     permissions:
       pages: write
       id-token: write
