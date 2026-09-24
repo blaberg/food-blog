@@ -6,10 +6,25 @@ on:
     paths:
       - cmd/**
       - recipes/**
+      - go.mod
+      - go.sum
+      - package.json
+      - package-lock.json
+      - .github/workflows/deploy.yaml
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,19 +34,20 @@ jobs:
           go-version: "1.23"
           cache: true
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
-      - name: Install Tailwind CSS CLI
-        run: npm i
+          node-version: "22"
+          cache: npm
+      - name: Install npm dependencies
+        run: npm ci
       - name: build
-        run: go run cmd/generator/main.go
+        run: go run ./cmd/generator
       - name: Upload static files as artifacts
         uses: actions/upload-pages-artifact@v3
-        id: deployment
         with:
           path: public/
   deploy:
+    if: github.event_name != 'pull_request'
     permissions:
       pages: write
       id-token: write
